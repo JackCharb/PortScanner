@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Jack Charbonneau 10/14/2017
+# Jack Charbonneau 09/17/2018
 
 import argparse
 import socket
@@ -9,15 +9,17 @@ import socket
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-H', type=str, dest='tgtHost', help='specify target host')
-    parser.add_argument('-p', type=str, dest='tgtPorts', help='specify target ports separated by commas')
+    parser.add_argument('-H', required=True, type=str, dest='tgtHost',
+                        help='specify target host')
+    parser.add_argument('-p', type=str, dest='tgtPorts',
+                        help='specify target ports separated by commas')
 
     args = parser.parse_args()
-    tgtHost = args.tgtHost
+    tgtHost = args.tgtHost  # are these needed?
     tgtPorts = args.tgtPorts
 
     if (tgtHost is None):
-        print(parser.usage)  # write parser usage
+        parser.print_usage()
         exit(0)
     else:
         if tgtPorts is None:
@@ -33,17 +35,17 @@ def portScan(tgtHost, tgtPorts):
     except socket.gaierror:
         print("[-] Could not resolve hostname: '%s'" % tgtHost)
         return
-    except socket.error:
+    except OSError:
         print("[-] Could not connect to server")
         return
 
     try:
-        tgtName = socket.gethostbyaddr(tgtIP) # fix this
+        tgtName = socket.gethostbyaddr(tgtIP)  # fix this
         print("[-] Scan results for: " + tgtName[0])
     except:
         print("[-] Scan results for: " + tgtIP)
 
-    socket.setdefaulttimeout(1)
+    socket.setdefaulttimeout(1)  # check this
 
     for tgtPort in tgtPorts:
         connScan(tgtHost, int(tgtPort))
@@ -51,7 +53,7 @@ def portScan(tgtHost, tgtPorts):
 
 def connScan(tgtHost, tgtPort):
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # factor out
         sock.connect((tgtHost, tgtPort))
         print("[+] Port %d open" % tgtPort)
         sock.close()
