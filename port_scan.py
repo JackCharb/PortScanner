@@ -11,6 +11,7 @@ def main():
     """Perform a port scan with the given target host and target ports. 
     If no target ports are given scan the 1000 most frequently used TCP ports.
     """
+    #  Get target host and ports from command line arguments
     tgtHost, tgtPorts = parse()
 
     if tgtPorts is None:
@@ -19,6 +20,7 @@ def main():
             reader = csv.reader(ports)
             tgtPorts = list(reader)[0]
     else:
+        #  Use provided ports
         tgtPorts = tgtPorts.split(",")
 
     resolveHost(tgtHost, tgtPorts)
@@ -26,7 +28,7 @@ def main():
 
 
 def parse():
-    """Parse command line arguments."""
+    """Parse and return command line arguments."""
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-H', required=True, type=str, dest='tgtHost',
@@ -42,9 +44,8 @@ def resolveHost(tgtHost, tgtPorts):
     to a valid hostname.
     """
     try:
+        #  Get IP of provided host
         tgtIP = socket.gethostbyname(tgtHost)
-        print("IP below")
-        print(tgtIP)
     except socket.gaierror:
         print("[-] Could not resolve hostname: '%s'" % tgtHost)
         return
@@ -53,16 +54,18 @@ def resolveHost(tgtHost, tgtPorts):
         return
 
     try:
+        #  Get primary hostname from IP
         tgtName = socket.gethostbyaddr(tgtIP)
-        print("[-] Scan results for: " + tgtName[0])
+        print("[-] Scan results for: '%s'" % tgtName[0])
     except:
-        print("[-] Scan results for: " + tgtIP)
+        print("[-] Scan results for: '%s'" % tgtIP)
 
 
 def scanPorts(tgtHost, tgtPorts):
     """Scan each port in the list of target ports and print
     whether the port is open or closed.
     """
+    #  Each port has one second to respond before timeout
     socket.setdefaulttimeout(1)
     for tgtPort in tgtPorts:
         try:
@@ -71,6 +74,7 @@ def scanPorts(tgtHost, tgtPorts):
             print("[+] Port %d open" % int(tgtPort))
             sock.close()
 
+        #  Allow program termination with ^C
         except KeyboardInterrupt:
             print()
             exit()
